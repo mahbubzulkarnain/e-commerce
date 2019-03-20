@@ -2,9 +2,10 @@ const router = require('express').Router();
 const User = require('../models/user/index');
 const bcrypt = require('bcrypt');
 const jwt = require('../helpers/jwt');
+const checkAuth = require('../middlewares/validator/checkAuth');
 
 router
-  .post('/register', function ({body}, res, next) {
+  .post('/register', checkAuth.register, function ({body}, res, next) {
     (new User(body))
       .save((err, data) => {
         if (err) {
@@ -16,16 +17,19 @@ router
         } else {
           res
             .status(201)
-            .json(data)
+            .json({
+              username: data.username,
+              email: data.email
+            })
         }
       })
   })
-  .post('/login', function ({body}, res) {
+  .post('/login', checkAuth.login, function ({body}, res) {
     User
       .findOne({
         $or: [
           {username: body.user},
-          {email: body.email},
+          {email: body.user},
         ]
       })
       .then((prop) => {
@@ -33,6 +37,9 @@ router
           res
             .status(200)
             .json({
+              id: prop._id,
+              username: prop.username,
+              fullname: prop.first_name + ' ' + prop.last_name,
               token: jwt.sign({
                 id: prop._id
               })
@@ -41,7 +48,7 @@ router
           res
             .status(403)
             .json({
-              message: 'Unauthorized'
+              message: 'Username/Email/Password Invalid'
             })
         }
       })

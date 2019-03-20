@@ -1,52 +1,40 @@
 const app = require('../app');
-const faker = require('faker');
 const chai = require('chai');
+
+const drop = require('../helpers/drop');
+var auth = require('./dummy/auth');
+const {data, methods, success, fail} = require('./dummy/product');
 
 const {expect} = chai;
 
 chai.use(require('chai-http'));
 
 describe('routes products', function () {
-  var token = '';
-  var slug = '';
-  var id = '';
-  let data = {
-    title: faker.commerce.productName(),
-    description: faker.name.jobDescriptor(),
-    price: faker.random.number(),
-    stock: faker.random.number(),
-    weight: faker.random.number(),
-    condition: 0,
-    notes: faker.name.jobDescriptor()
-  };
+
+  before(function () {
+    drop.collection('product')
+  });
 
   describe('success', function () {
-    it('should login', function (done) {
-      chai
-        .request(app)
-        .post('/auth/login')
-        .send({
-          user: 'admin',
-          password: 'uye'
-        })
-        .end(function (err, res) {
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.property('token');
-          token = res.body.token;
-          done();
-        })
-    });
+    auth
+      .methods
+      .login(app, chai, auth.data.seller, (err, res, done) => {
+        auth.data.seller['id'] = res.body.id;
+        auth.data.seller['token'] = res.body.token;
+        done();
+      });
 
     it('should created product', function (done) {
       chai
         .request(app)
         .post('/products')
-        .set('Authorization', token)
-        .send(data)
+        .set('Authorization', auth.data.seller.token)
+        .send(success.create)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(201);
-          id = res.body._id;
-          slug = res.body.slug;
+          data.product.id = res.body._id;
+          data.product.slug = res.body.slug;
           done()
         })
     });
@@ -56,38 +44,43 @@ describe('routes products', function () {
         .request(app)
         .get('/products')
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(200);
           done()
         })
     });
 
-    it('should read product with slug ' + slug, function (done) {
+    it('should read product with slug ', function (done) {
       chai
         .request(app)
-        .get('/products/' + slug)
+        .get('/products/' + data.product.slug)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(200);
           done();
         })
     });
 
-    it('should update product with id ' + id, function (done) {
+    it('should update product with id ', function (done) {
       chai
         .request(app)
-        .put('/products/' + id)
-        .set('Authorization', token)
+        .put('/products/' + data.product.id)
+        .set('Authorization', auth.data.seller.token)
+        .send({title: success.create.title + ' Update'})
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(200);
           done()
         })
     });
 
-    it('should delete product with id ' + id, function (done) {
+    it('should delete product with id', function (done) {
       chai
         .request(app)
-        .delete('/products/' + id)
-        .set('Authorization', token)
+        .delete('/products/' + data.product.id)
+        .set('Authorization', auth.data.seller.token)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(200);
           done()
         })
@@ -99,8 +92,9 @@ describe('routes products', function () {
       chai
         .request(app)
         .post('/products')
-        .send(data)
+        .send(success.create)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(403);
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.equal('Unauthorized');
@@ -112,8 +106,9 @@ describe('routes products', function () {
       chai
         .request(app)
         .post('/products')
-        .send(data)
+        .send(success.create)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(403);
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.equal('Unauthorized');
@@ -121,11 +116,12 @@ describe('routes products', function () {
         })
     });
 
-    it('should missing product with slug ' + slug, function (done) {
+    it('should missing product with slug', function (done) {
       chai
         .request(app)
-        .get('/products/' + slug)
+        .get('/products/' + data.product.slug)
         .end(function (err, res) {
+          console.log(res.body);
           expect(res).to.have.status(204);
           done();
         })

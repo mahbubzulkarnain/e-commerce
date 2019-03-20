@@ -20,5 +20,5 @@ module.exports = function (schema) {
       }
       this.password = bcrypt.hashSync(this.password, bcrypt.genSaltSync(8));
       next();
-    })
+    });
 };

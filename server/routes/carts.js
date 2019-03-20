@@ -28,12 +28,23 @@ router
       })
   })
   .post('/', jwt, function ({body}, res) {
+    let transactions = [];
+    if (body.transactions instanceof Array) {
+      console.log('array');
+      transactions = body.transactions;
+    } else if (body.transactions instanceof Object) {
+      console.log('object');
+      transactions.push(body.transactions)
+    } else if (body.transactions) {
+      transactions = (JSON.parse(body.transactions))
+    }
+    console.log(transactions);
     (new Cart({
       buyer: res.locals.user.id,
-      products: body.products,
-      quantity: body.quantity
+      transactions
     })).save((err, data) => {
       if (err) {
+        console.log(err);
         res
           .status(500)
           .json({

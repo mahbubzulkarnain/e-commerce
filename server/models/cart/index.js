@@ -5,13 +5,21 @@ const cartSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: (require('../user')).collection.name
   },
-  products: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: (require('../product')).collection.name
-  },
-  quantity: {
-    type: Number,
-    default: 1
+  transactions: [
+    {
+      products: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: (require('../product')).collection.name
+      },
+      quantity: {
+        type: Number,
+        default: 1
+      }
+    }
+  ],
+  created_at: {
+    type: Date,
+    default: new Date()
   }
 });
 
