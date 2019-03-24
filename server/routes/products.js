@@ -1,11 +1,14 @@
 const router = require('express').Router();
 const Product = require('../models/product/index');
 const jwt = require('../middlewares/jwt');
+const checkProducts = require('../middlewares/validator/checkProducts');
+const images = require('../helpers/images/google');
 
 router
   .get('/:slug', function ({params}, res) {
     Product
       .findBySlug(params.slug)
+      .populate('author', '-password')
       .then((prop) => {
         if (!prop) {
           res
@@ -25,7 +28,9 @@ router
           })
       })
   })
-  .put('/:id', jwt, function ({params, body}, res) {
+  .put('/:id', jwt, images.multer.single('file'), checkProducts.update, images.sendUploadToGCS, function ({params, body}, res) {
+    delete body['_id'];
+    delete body['author'];
     Product
       .findOne({
         _id: params.id,
@@ -36,6 +41,7 @@ router
           throw new Product().invalidate('product', 'Not found', '');
         }
         delete body['author'];
+        product.updated_at = new Date();
         Object.assign(product, body);
         return product.save();
       })
@@ -64,6 +70,11 @@ router
             .status(204)
             .send()
         }
+        if (product.picture) {
+          let filename = product.picture.split('/');
+          filename = filename[filename.length - 1];
+          images.deleteFileInGCS(filename)
+        }
         return product.remove()
       })
       .then((prop) => {
@@ -84,6 +95,7 @@ router
   .get('/', function (req, res, next) {
     Product
       .find()
+      .populate('author', '-password')
       .then((props) => {
         res
           .json(props)
@@ -97,7 +109,11 @@ router
           })
       })
   })
-  .post('/', jwt, function ({body}, res, next) {
+  .post('/', jwt, images.multer.single('file'), checkProducts.create, images.sendUploadToGCS, function (req, res, next) {
+    const {body} = req;
+    if (req.file && req.file.cloudStoragePublicUrl) {
+      body['picture'] = req.file.cloudStoragePublicUrl;
+    }
     body['author'] = res.locals.user.id;
     (new Product(body))
       .save((err, data) => {

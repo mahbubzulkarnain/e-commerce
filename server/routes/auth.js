@@ -7,7 +7,7 @@ const checkAuth = require('../middlewares/validator/checkAuth');
 router
   .post('/register', checkAuth.register, function ({body}, res, next) {
     (new User(body))
-      .save((err, data) => {
+      .save((err, prop) => {
         if (err) {
           res
             .status(422)
@@ -18,8 +18,13 @@ router
           res
             .status(201)
             .json({
-              username: data.username,
-              email: data.email
+              id: prop._id,
+              username: prop.username,
+              email: prop.email,
+              fullname: prop.first_name + ' ' + prop.last_name,
+              token: jwt.sign({
+                id: prop._id
+              })
             })
         }
       })
@@ -39,6 +44,7 @@ router
             .json({
               id: prop._id,
               username: prop.username,
+              email: prop.email,
               fullname: prop.first_name + ' ' + prop.last_name,
               token: jwt.sign({
                 id: prop._id
@@ -46,7 +52,7 @@ router
             })
         } else {
           res
-            .status(403)
+            .status(400)
             .json({
               message: 'Username/Email/Password Invalid'
             })

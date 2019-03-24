@@ -36,5 +36,15 @@ module.exports = {
       notes: faker.name.jobDescriptor()
     }
   },
-  fail: {}
+  fail: {
+    create: {
+      title: faker.commerce.productName(),
+      description: faker.name.jobDescriptor(),
+      price: 0 - faker.random.number(),
+      stock: 0 - faker.random.number(),
+      weight: 0 - faker.random.number(),
+      condition: 0,
+      notes: faker.name.jobDescriptor()
+    }
+  }
 };

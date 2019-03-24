@@ -16,34 +16,38 @@ module.exports = {
   methods: {
     register(app, chai, payload) {
       const {expect} = chai;
-      it(`should create new user ${payload.username} and have username, email`, function (done) {
-        chai
-          .request(app)
-          .post('/auth/register')
-          .send(Object.assign(payload))
-          .end(function (err, res) {
-            console.log(res.body);
-            expect(res).have.status(201);
-            expect(res).to.be.a('object');
-            expect(res.body).to.have.all.keys('username', 'email');
-            expect(res.body).to.not.have.property('password');
-            done();
-          })
+      describe('/POST /auth/register', function () {
+        it(`should create new user ${payload.username} and have token, email, username, fullname, id`, function (done) {
+          chai
+            .request(app)
+            .post('/auth/register')
+            .send(Object.assign(payload))
+            .end(function (err, res) {
+              console.log(res.body);
+              expect(res).have.status(201);
+              expect(res).to.be.a('object');
+              expect(res.body).to.have.all.keys('id', 'username', 'email', 'fullname', 'token');
+              expect(res.body).to.not.have.property('password');
+              done();
+            })
+        });
       });
     },
     login(app, chai, payload, cb) {
       const {expect} = chai;
-      it(`should ${payload.username} login success and have token, username, fullname, id`, function (done) {
-        chai
-          .request(app)
-          .post('/auth/login')
-          .send({user: payload.username, password: payload.password})
-          .end(function (err, res) {
-            console.log(res.body);
-            expect(res).have.status(200);
-            expect(res.body).to.have.all.keys('token', 'username', 'fullname', 'id');
-            cb(err, res, done);
-          })
+      describe('/POST /auth/login', function () {
+        it(`should ${payload.username} login success and have token, email, username, fullname, id`, function (done) {
+          chai
+            .request(app)
+            .post('/auth/login')
+            .send({user: payload.username, password: payload.password})
+            .end(function (err, res) {
+              console.log(res.body);
+              expect(res).have.status(200);
+              expect(res.body).to.have.all.keys('id', 'username', 'email', 'fullname', 'token');
+              cb(err, res, done);
+            })
+        });
       });
     }
   },

@@ -1,3 +1,5 @@
+const path = require('path');
+
 const expressValidator = require('express-validator');
 const {ObjectId} = (require('mongoose')).Types;
 const User = require('../models/user/index');
@@ -22,6 +24,22 @@ function isParamsUserAvailable(params) {
 
 module.exports = expressValidator({
   customValidators: {
+    isImage: function (value, filename) {
+      var extension = (path.extname(filename)).toLowerCase();
+      switch (extension) {
+        case '.jpg':
+          return '.jpg';
+        case '.jpeg':
+          return '.jpeg';
+        case  '.png':
+          return '.png';
+        default:
+          return false;
+      }
+    },
+    numberMustEqualGreaterZero: function (input) {
+      return input >= 0
+    },
     usernameIsAvailable: function (username, id = '') {
       return isParamsUserAvailable(((id !== '') ? {
         username: username,

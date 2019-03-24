@@ -1,25 +1,18 @@
 <template>
-  <section class="container home-page">
-    <img src="../assets/img/header.jpg">
-    <div class="columns">
-      <div class="column">
-        <img src="../assets/img/header.jpg">
-      </div>
-      <div class="column">
-        <img src="../assets/img/header.jpg">
-      </div>
-      <div class="column">
-        <img src="../assets/img/header.jpg">
+  <WithSidebar>
+    <div class="columns" v-if="false">
+      <div class="column is-full">
+        Promo
       </div>
     </div>
-    <ProductsList :title="'Catalog'" :products="products"></ProductsList>
-  </section>
+    <ProductsList :title="'Catalog'" :products="products"/>
+  </WithSidebar>
 </template>
 
 <script>
-// @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue';
-import ProductsList from '../components/products/ProductsList';
+import ProductsList from '@/components/products/ProductsList';
+import Carousel from '@/components/Carousel.vue';
 
 export default {
   name: 'HomePage',
@@ -42,12 +35,11 @@ export default {
   components: {
     HelloWorld,
     ProductsList,
+    Carousel,
   },
 };
 </script>
 
 <style scoped lang="scss">
-  .home-page {
-    margin-top: 3.5rem;
-  }
+
 </style>

@@ -12,7 +12,7 @@ function checkIsLogin(next) {
   }
 }
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -25,6 +25,43 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home,
+    },
+    {
+      path: '/carts',
+      name: 'cart',
+      component: () => import(/* webpackChunkName: "login" */ './views/Cart.vue'),
+    },
+    {
+      path: '/p',
+      name: 'product',
+      component: () => import(/* webpackChunkName: "product-index" */ './views/product/Index.vue'),
+      children: [
+        {
+          path: 'create',
+          name: 'product-create',
+          component: () => import(/* webpackChunkName: "product-read" */ './views/product/Create.vue'),
+        },
+        {
+          path: 'edit/:id',
+          name: 'product-edit',
+          component: () => import(/* webpackChunkName: "product-read" */ './views/product/Create.vue'),
+        },
+        {
+          path: 'list',
+          name: 'product-list',
+          component: () => import(/* webpackChunkName: "product-read" */ './views/product/List.vue'),
+        },
+        {
+          path: 'history',
+          name: 'product-history',
+          component: () => import(/* webpackChunkName: "product-read" */ './views/product/History.vue'),
+        },
+        {
+          path: ':id',
+          name: 'product-read-by-id',
+          component: () => import(/* webpackChunkName: "product-read" */ './views/product/Read.vue'),
+        },
+      ],
     },
     {
       path: '/login',
@@ -52,3 +89,18 @@ export default new Router({
     },
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (store.getters.isLoggedIn) {
+      next();
+      return;
+    }
+    next('/login');
+  } else {
+    next();
+  }
+});
+
+
+export default router;

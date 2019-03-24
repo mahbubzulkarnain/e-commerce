@@ -1,12 +1,12 @@
 <template>
   <div class="product-list">
-    <router-link class="is-pulled-right product-list-seemore" to="#">See More...</router-link>
-    <p class="product-list-title">Nyantai dengan kursi santai</p>
-    <ul class="columns is-multiline">
+    <router-link class="is-pulled-right product-list-seemore" to="#" v-if="showSeeMore">See More...</router-link>
+    <!--<p class="product-list-title">Nyantai dengan kursi santai</p>-->
+    <div class="columns is-multiline">
       <li v-for="product in products" class="column is-one-fifth">
         <ProductItems :product="product"/>
       </li>
-    </ul>
+    </div>
   </div>
 </template>
 
@@ -24,6 +24,9 @@ export default {
     },
     products: {
       default: [],
+    },
+    showSeeMore: {
+      default: false,
     },
   },
 };

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service lint --fix; vue-cli-service serve;",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -14,10 +14,14 @@
     "@fortawesome/vue-fontawesome": "^0.1.6",
     "axios": "^0.18.0",
     "bulma": "^0.7.4",
+    "bulma-badge": "^3.0.0",
+    "bulma-carousel": "^4.0.3",
     "faker": "^4.1.0",
     "vue": "^2.6.6",
+    "vue-clazy-load": "^0.4.2",
     "vue-router": "^3.0.1",
-    "vue-spinner": "^1.0.3"
+    "vue-spinner": "^1.0.3",
+    "vuex": "^3.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.0",

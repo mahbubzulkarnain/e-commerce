@@ -1,34 +1,34 @@
 import Vue from 'vue';
-import axios from 'axios';
+import VueClazyLoad from 'vue-clazy-load';
+import api from './helpers/api';
 import App from './App.vue';
 import router from './router';
+import store from './store';
 
-/**
- * fontawesome
- */
-const baseURL = 'http://localhost:3000';
+import ImageLazyLoad from './components/ImageLazyLoad';
 
-let headers = {};
+import WithSidebar from './components/layout/WithSidebar.vue';
+import WithoutSidebar from './components/layout/WithoutSidebar.vue';
+
+Vue.use(VueClazyLoad);
+
+Vue.component('ImageLazyLoad', ImageLazyLoad);
+
+
+Vue.component('WithSidebar', WithSidebar);
+Vue.component('WithoutSidebar', WithoutSidebar);
+
+Vue.prototype.$api = api;
 
 if (localStorage.xs) {
-  headers = {
-    headers: {
-      authorization: `Bearer ${localStorage.xs}`,
-    },
-  };
+  Vue.prototype.$api.defaults.headers.common.Authorization = `Bearer ${localStorage.xs}`;
 }
 
-Vue.prototype.$baseURL = baseURL;
-
-Vue.prototype.$api = axios.create({
-  baseURL: `${baseURL}`,
-  timeout: 3000,
-  ...headers,
-});
-
 Vue.config.productionTip = false;
+document.title = `Ecommerce`;
 
 new Vue({
   router,
+  store,
   render: h => h(App),
 }).$mount('#app');

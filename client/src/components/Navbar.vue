@@ -12,30 +12,43 @@
       </a>
     </div>
     <div id="navbarBasicExample" class="navbar-menu">
-      <div class="navbar-end">
-        <div class="navbar-item has-dropdown is-hoverable">
+      <div class="navbar-start">
+        <div class="navbar-item has-dropdown is-hoverable" v-if="false">
           <a class="navbar-link is-arrowless">
-            <span class="icon"> <i class="fas fa-list-ul"/></span>
             Category
+            <span class="icon"> <i class="fas fa-list-ul"/></span>
           </a>
 
-          <div class="navbar-dropdown is-right">
-            <router-link class="navbar-item" v-for="category in categories" :to="'/c/'+category.slug">
+          <div class="navbar-dropdown">
+            <router-link class="navbar-item" v-for="(category, i) in categories" :to="'/c/'+category.slug" :key="i">
               {{category.title}}
             </router-link>
           </div>
         </div>
-        <!--shopping-cart-->
-        <div class="navbar-item has-dropdown is-hoverable" v-if="$parent.isLogin">
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item" v-if="false">
+          <form class="is-full">
+            <div class="field">
+              <div class="control has-icons-left">
+                <input type="text" class="input is-rounded" placeholder="Search...">
+                <span class="icon is-small is-left">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                </span>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable" v-if="isLogin && false">
           <a class="navbar-link is-arrowless">
             <i class="fa fa-shopping-cart"></i>
           </a>
           <div class="navbar-dropdown is-right">
             <div class="carts">
               <div class="carts-body">
-                <div class="cart-item" v-for="cart in carts">
+                <div class="cart-item" v-for="(cart, i) in carts" :key="i">
                   <div class="cart-item-image">
-                    <img src="../assets/img/header.jpg">
+                    <img src="../assets/images/header.jpg">
                   </div>
                   <div class="cart-item-title">
                     {{cart.title}}
@@ -57,14 +70,15 @@
             </div>
           </div>
         </div>
-        <div class="navbar-item has-dropdown is-hoverable" v-if="$parent.isLogin">
+        <div class="navbar-item has-dropdown is-hoverable" v-if="isLogin">
           <a class="navbar-link is-arrowless">
             <img class="image is-rounded" src="https://bulma.io/images/placeholders/128x128.png">
+            <span style="padding-left: 10px;">{{user.fullname.split(' ')[0]}}</span>
           </a>
 
           <div class="navbar-dropdown is-right">
             <a class="navbar-item">
-              Full Name User
+              {{user.fullname}}
             </a>
             <a class="navbar-item" v-if="false">
               Setting
@@ -75,14 +89,14 @@
             </a>
           </div>
         </div>
-        <div class="navbar-item" v-if="!$parent.isLogin">
+        <div class="navbar-item" v-if="!isLogin">
           <div class="buttons">
             <router-link to="/register" class="button is-primary">
               <strong>Register</strong>
             </router-link>
           </div>
         </div>
-        <div class="navbar-item" v-if="!$parent.isLogin">
+        <div class="navbar-item" v-if="!isLogin">
           <div class="buttons">
             <router-link to="/login" class="button is-primary is-outlined">
               <strong>Login</strong>
@@ -163,6 +177,14 @@ export default {
       ],
     };
   },
+  computed: {
+    isLogin() {
+      return this.$store.getters.isLogin;
+    },
+    user() {
+      return this.$store.getters.user;
+    },
+  },
   methods: {
     logout() {
       try {
@@ -175,7 +197,10 @@ export default {
 
       }
       localStorage.clear();
-      this.$parent.isLogin = false;
+      this.$store.dispatch('logout')
+        .then(() => {
+          this.$router.push('/login');
+        });
     },
   },
 };
@@ -246,6 +271,16 @@ export default {
     }
 
     .navbar-menu {
+      .navbar-start {
+        background-color: white;
+
+        .navbar-link {
+          .icon {
+            padding-left: 10px;
+          }
+        }
+      }
+
       .navbar-end {
         background-color: white;
 

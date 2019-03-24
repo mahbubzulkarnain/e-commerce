@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="app">
     <Navbar :bg-navbar="bgNavbar"/>
     <router-view/>
   </div>
@@ -7,7 +7,6 @@
 
 <script>
 import Navbar from '@/components/Navbar';
-import axios from 'axios';
 
 export default {
   data() {
@@ -17,8 +16,15 @@ export default {
       fullname: 'Profile',
       username: '',
       auth2: '',
-      isLogin: false,
     };
+  },
+  created() {
+    this.$api.interceptors.response.use(undefined, err => new Promise(function (resolve, reject) {
+      if (err.status === 401 && err.config && !err.config.__isRetryRequest) {
+        this.$store.dispatch(logout);
+      }
+      throw err;
+    }));
   },
   methods: {
     attachSignin(element) {
@@ -49,36 +55,6 @@ export default {
       this.checkLogin(id_token);
     },
   },
-  beforeUpdate() {
-    if (localStorage.xf) {
-      this.fullname = localStorage.xf;
-    }
-
-    if (localStorage.xu) {
-      this.username = localStorage.xu;
-    }
-
-    if (this.page === 'edit' && !this.newarticle.title) {
-      this.page = 'create';
-    }
-
-    let headers = {};
-    if (localStorage.xs && localStorage.xi) {
-      this.isLogin = true;
-      headers = {
-        headers: {
-          authorization: `Bearer ${localStorage.xs}`,
-        },
-      };
-    } else {
-      this.isLogin = false;
-    }
-    this.$api = axios.create({
-      baseURL: `${this.$baseURL}/api`,
-      timeout: 3000,
-      ...headers,
-    });
-  },
   components: {
     Navbar,
   },
@@ -103,6 +79,25 @@ export default {
   $footer-background-color: white;
   $footer-padding: 0;
 
+  $panel-heading-background-color: white;
+  $panel-heading-radius: 0;
+  $panel-item-border: none;
+  $panel-heading-color: $color-primary;
+  $panel-heading-weight: bold;
+
+  .is-fullwidth {
+    width: 100%;
+  }
+
+  #app {
+    padding-top: .5rem;
+  }
+
+  .router-link-exact-active {
+    @extend .is-active;
+  }
+
   @import "~bulma/bulma.sass";
+  @import "~bulma-badge/src/sass/index";
 
 </style>
