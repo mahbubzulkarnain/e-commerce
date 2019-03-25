@@ -5,7 +5,7 @@ import api from './helpers/api';
 Vue.use(Vuex);
 
 const authSuccess = (commit, res) => {
-  const { token } = res.data;
+  const {token} = res.data;
   const user = {
     id: res.data.id,
     username: res.data.username,
@@ -18,16 +18,16 @@ const authSuccess = (commit, res) => {
   localStorage.setItem('xe', user.email);
   localStorage.setItem('xf', user.fullname);
   api.defaults.headers.common.Authorization = `Bearer ${token}`;
-  commit('auth_success', { token, user });
+  commit('auth_success', {token, user});
 };
 
-const authError = (err) => {
-  commit('auth_error');
+const authError = (commit) => {
   localStorage.removeItem('xs');
   localStorage.removeItem('xi');
   localStorage.removeItem('xu');
   localStorage.removeItem('xe');
   localStorage.removeItem('xf');
+  commit('auth_error');
 };
 
 export default new Vuex.Store({
@@ -59,7 +59,7 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    login({ commit }, user) {
+    login({commit}, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request');
         api
@@ -69,25 +69,27 @@ export default new Vuex.Store({
             resolve(res);
           })
           .catch((err) => {
-            authError(err);
+            authError(commit);
             reject(err);
           });
       });
     },
-    register({ commit }, user) {
-      commit('auth_request');
-      api
-        .post('/auth/register', user)
-        .then((res) => {
-          authSuccess(commit, res);
-          resolve(res);
-        })
-        .catch((err) => {
-          authError(err);
-          reject(err);
-        });
+    register({commit}, user) {
+      return new Promise((resolve, reject) => {
+        commit('auth_request');
+        api
+          .post('/auth/register', user)
+          .then((res) => {
+            authSuccess(commit, res);
+            resolve(res);
+          })
+          .catch((err) => {
+            authError(commit);
+            reject(err);
+          });
+      });
     },
-    logout({ commit }) {
+    logout({commit}) {
       return new Promise((resolve, reject) => {
         commit('logout');
         localStorage.clear();

@@ -2,19 +2,29 @@
   <WithoutSidebar>
     <div class="columns is-vcentered">
       <form class="column is-two-fifths is-offset-1" @submit.prevent="postRegister">
-        <div class="notification is-danger" v-if="error">
-          {{error}}
-        </div>
         <div class="field">
           <div class="field-label is-normal has-text-left">
-            <label class="label">Display Name</label>
+            <label class="label">First Name</label>
           </div>
           <div class="field-body">
             <div class="field">
               <div class="control">
-                <input type="text" placeholder="Display Name" class="input" v-model="name" required>
+                <input type="text" placeholder="First Name" class="input" v-model="first_name" required>
               </div>
-              <p class="help is-danger" v-if="error['name']">{{error['name'].message}}</p>
+              <p class="help is-danger" v-if="error['first_name']">{{error['first_name'].message}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label is-normal has-text-left">
+            <label class="label">Last Name</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input type="text" placeholder="Last Name" class="input" v-model="last_name" required>
+              </div>
+              <p class="help is-danger" v-if="error['last_name']">{{error['last_name'].message}}</p>
             </div>
           </div>
         </div>
@@ -28,6 +38,19 @@
                 <input type="text" placeholder="Email" class="input" v-model="email" required>
               </div>
               <p class="help is-danger" v-if="error['email']">{{error['email'].message}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label is-normal has-text-left">
+            <label class="label">Username</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input type="text" placeholder="Username" class="input" v-model="username" required>
+              </div>
+              <p class="help is-danger" v-if="error['username']">{{error['username'].message}}</p>
             </div>
           </div>
         </div>
@@ -69,41 +92,41 @@
 </template>
 
 <script>
-export default {
-  name: 'Register',
-  data() {
-    return {
-      name: '',
-      email: '',
-      password: '',
-      error: '',
-    };
-  },
-  methods: {
-    postRegister() {
-      this.error = '';
-      this.$auth.createUserWithEmailAndPassword(this.email, this.password)
-        .then(() => this.$auth.currentUser)
-        .then((user) => {
-          user.updateProfile({
-            displayName: this.name,
-          });
-          this.$parent.isLogin = true;
-          this.$router.replace('/');
-        })
-        .catch((err) => {
-          if (err.code === 'auth/email-already-in-use') {
-            this.error = 'Your email has already exist';
-          } else if (err.code === 'auth/weak-password' || err.code === 'auth/invalid-email') {
-            this.error = err.message;
-          }
-          setTimeout(() => {
-            this.error = '';
-          }, 3000);
-        });
+  export default {
+    name: 'Register',
+    data() {
+      return {
+        first_name: '',
+        last_name: '',
+        email: '',
+        username: '',
+        password: '',
+        error: '',
+      };
     },
-  },
-};
+    methods: {
+      postRegister() {
+        this.error = '';
+        let email = this.email;
+        let first_name = this.first_name;
+        let last_name = this.last_name;
+        let username = this.username;
+        let password = this.password;
+        this.$store.dispatch('register', {first_name, last_name, email, username, password})
+          .then(() => {
+            this.$router.replace('/');
+          })
+          .catch((err) => {
+            if (err.response.data && err.response.data.message) {
+              this.error = err.response.data.message.errors;
+            }
+            setTimeout(() => {
+              // this.error = '';
+            }, 3000);
+          });
+      },
+    },
+  };
 </script>
 
 <style scoped>

@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+console.log(process.env.DATABASE_URL);
 require('mongoose')
   .connect(process.env.DATABASE_URL, {
     useCreateIndex: true,
