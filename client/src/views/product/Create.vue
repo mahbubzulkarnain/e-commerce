@@ -7,7 +7,7 @@
       <div class="column is-two-fifths">
         <div class="field">
           <div class="control">
-            <input type="submit" value="Sell" class="button is-primary is-fullwidth">
+            <a :class="btnSell" ref="btnSell" @click="create_product">Sell</a>
           </div>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <div class="panel" @click="$refs.inputFile.click()" style="border: 1px dashed #bbb;padding: 1rem;">
           <div class="panel-body has-text-centered">
             <img
-              :src="newProduct.picture || '@/assets/images/upload-image.png'"
+              :src="newProduct.picture || '/assets/images/upload-image.png'"
               style="width: 150px;margin: 0 auto;display: block;"
               ref="outputFile"
             />
@@ -34,6 +34,7 @@
             >
           </div>
         </div>
+        <p class="is-size-7 has-text-danger" v-if="error['file']">{{error['file'].message}}</p>
       </div>
       <div class="column is-three-fifths">
         <div class="panel">
@@ -136,34 +137,41 @@
     data() {
       return {
         error: {},
+        btnSell: {
+          button: true,
+          'is-primary': true,
+          'is-loading': false,
+          'is-fullwidth': true,
+        },
         newProduct: {
-          _id: ``,
-          title: ``,
-          description: ``,
+          _id: '',
+          title: '',
+          description: '',
           price: 0,
           stock: 0,
           weight: 0,
           condition: 0,
-        }
-      }
+          picture: ''
+        },
+      };
     },
     mounted() {
       if (this.$router.currentRoute.params.id) {
-        this.$api.get('/products/' + this.$router.currentRoute.params.id)
+        this.$api.get(`/products/${this.$router.currentRoute.params.id}`)
           .then(({data}) => {
             this.newProduct = data;
-            console.log(this.newProduct)
+            console.log(this.newProduct);
           })
           .catch((err) => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       }
     },
     methods: {
       previewFiles() {
-        let files = this.$refs.inputFile.files;
+        const {files} = this.$refs.inputFile;
         if (files && files[0]) {
-          let reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = (e) => {
             this.$refs.outputFile.src = e.target.result;
           };
@@ -171,52 +179,66 @@
         }
       },
       create_product() {
-        let dataUpload = this.newProduct;
+        this.btnSell['is-loading'] = true;
 
-        var formData = new FormData();
-        var dataFile = document.querySelector('#file');
-        formData.append("title", dataUpload.title);
-        formData.append("description", dataUpload.description);
-        formData.append("price", +dataUpload.price);
-        formData.append("stock", +dataUpload.stock);
-        formData.append("weight", +dataUpload.weight);
-        formData.append("condition", +dataUpload.condition);
-        formData.append("file", dataFile.files[0]);
-        if (this.newProduct.slug !== this.$router.currentRoute.params.id) {
+
+        const dataUpload = this.newProduct;
+
+        const formData = new FormData();
+        const dataFile = document.querySelector('#file');
+        formData.append('title', dataUpload.title);
+        formData.append('description', dataUpload.description);
+        formData.append('price', +dataUpload.price);
+        formData.append('stock', +dataUpload.stock);
+        formData.append('weight', +dataUpload.weight);
+        formData.append('condition', +dataUpload.condition);
+        formData.append('file', dataFile.files[0]);
+
+        if (!this.newProduct.slug && !this.$router.currentRoute.params.id) {
           this.$api
             .post('/products', formData, {
               headers: {
-                'Content-Type': 'multipart/form-data'
-              }
+                'Content-Type': 'multipart/form-data',
+              },
             })
             .then(({data}) => {
-              this.$router.replace('/p/' + data.slug)
-            })
-            .catch((err) => {
-              console.log(err)
-            })
-        } else {
-          this.$api
-            .put('/products/' + this.newProduct._id, formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            })
-            .then(({data}) => {
-              this.$router.replace('/p/' + data.slug)
+              this.$router.replace(`/p/${data.slug}`);
             })
             .catch((err) => {
               if (err.response.data && err.response.data.message) {
                 this.error = err.response.data.message.errors;
-                console.log(this.error)
               }
               setTimeout(() => {
                 // this.error = '';
               }, 3000);
             })
+            .finally(() => {
+              this.btnSell['is-loading'] = false;
+            });
+        } else {
+          this.$api
+            .put(`/products/${this.newProduct._id}`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            })
+            .then(({data}) => {
+              this.$router.replace(`/p/${data.slug}`);
+            })
+            .catch((err) => {
+              if (err.response.data && err.response.data.message) {
+                this.error = err.response.data.message.errors;
+              }
+              setTimeout(() => {
+                // this.error = '';
+              }, 3000);
+            })
+            .finally(() => {
+              this.btnSell['is-loading'] = false;
+            });
         }
-      }
-    }
+      },
+    },
   };
 </script>
 

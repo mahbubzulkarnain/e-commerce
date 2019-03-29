@@ -5,6 +5,7 @@ const checkProducts = require('../middlewares/validator/checkProducts');
 const images = require('../helpers/images/google');
 
 router
+  // /READ Product by slug
   .get('/:slug', function ({params}, res) {
     Product
       .findBySlug(params.slug)
@@ -28,6 +29,7 @@ router
           })
       })
   })
+  // /PUT Update Product by id
   .put('/:id', jwt, images.multer.single('file'), checkProducts.update, images.sendUploadToGCS, function ({params, body}, res) {
     delete body['_id'];
     delete body['author'];
@@ -58,6 +60,7 @@ router
           })
       })
   })
+  // /DELETE DELETE Product by id
   .delete('/:id', jwt, function ({params, body}, res,) {
     Product
       .findOne({
@@ -92,6 +95,7 @@ router
   });
 
 router
+  // /GET List Product
   .get('/', function (req, res, next) {
     Product
       .find()
@@ -109,6 +113,7 @@ router
           })
       })
   })
+  // /POST Create New Product
   .post('/', jwt, images.multer.single('file'), checkProducts.create, images.sendUploadToGCS, function (req, res, next) {
     const {body} = req;
     if (req.file && req.file.cloudStoragePublicUrl) {

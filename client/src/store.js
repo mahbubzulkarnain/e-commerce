@@ -5,7 +5,7 @@ import api from './helpers/api';
 Vue.use(Vuex);
 
 const authSuccess = (commit, res) => {
-  const {token} = res.data;
+  const { token } = res.data;
   const user = {
     id: res.data.id,
     username: res.data.username,
@@ -18,7 +18,7 @@ const authSuccess = (commit, res) => {
   localStorage.setItem('xe', user.email);
   localStorage.setItem('xf', user.fullname);
   api.defaults.headers.common.Authorization = `Bearer ${token}`;
-  commit('auth_success', {token, user});
+  commit('auth_success', { token, user });
 };
 
 const authError = (commit) => {
@@ -59,7 +59,7 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    login({commit}, user) {
+    login({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request');
         api
@@ -74,7 +74,7 @@ export default new Vuex.Store({
           });
       });
     },
-    register({commit}, user) {
+    register({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request');
         api
@@ -89,7 +89,7 @@ export default new Vuex.Store({
           });
       });
     },
-    logout({commit}) {
+    logout({ commit }) {
       return new Promise((resolve, reject) => {
         commit('logout');
         localStorage.clear();

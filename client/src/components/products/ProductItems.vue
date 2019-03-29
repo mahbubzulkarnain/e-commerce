@@ -23,49 +23,49 @@
 </template>
 
 <script>
-  export default {
-    name: 'ProductItems',
-    data() {
-      return {
-        itemdefault: {
-          _id: ``,
-          title: '',
-          price: '',
-          author: {
-            _id: ``
-          }
+export default {
+  name: 'ProductItems',
+  data() {
+    return {
+      itemdefault: {
+        _id: '',
+        title: '',
+        price: '',
+        author: {
+          _id: '',
         },
+      },
+    };
+  },
+  props: ['product'],
+  methods: {
+    deleteProduct(id) {
+      this.$api
+        .delete(`/products/${id}`)
+        .then(({ data }) => {
+          this.$refs[id].remove();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    rupiah(price) {
+      if (isNaN(price) || typeof price !== 'number') return `Rp. ${0}`;
+      return `Rp. ${Number.parseFloat(price).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    },
+  },
+  computed: {
+    user() {
+      return this.$store.getters.user;
+    },
+    item() {
+      return {
+        ...this.itemdefault,
+        ...this.product,
       };
     },
-    props: ['product'],
-    methods: {
-      deleteProduct(id) {
-        this.$api
-          .delete('/products/' + id)
-          .then(({data}) => {
-            this.$refs[id].remove()
-          })
-          .catch((err) => {
-            console.log(err)
-          })
-      },
-      rupiah(price) {
-        if (isNaN(price) || typeof price !== 'number') return 'Rp. ' + 0;
-        return 'Rp. ' + Number.parseFloat(price).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      },
-    },
-    computed: {
-      user() {
-        return this.$store.getters.user
-      },
-      item() {
-        return {
-          ...this.itemdefault,
-          ...this.product,
-        };
-      },
-    },
-  };
+  },
+};
 </script>
 
 <style scoped lang="scss">

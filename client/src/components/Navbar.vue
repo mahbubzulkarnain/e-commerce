@@ -2,7 +2,7 @@
   <nav class="navbar is-fixed-top container" role="navigation" aria-label="main navigation"
        :style="{'background-color': $parent.bgNavbar}">
     <div class="navbar-brand">
-      <router-link to="/" class="navbar-item">Ecommerce
+      <router-link to="/" class="navbar-item">{{webname}}
       </router-link>
       <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
          data-target="navbarBasicExample">

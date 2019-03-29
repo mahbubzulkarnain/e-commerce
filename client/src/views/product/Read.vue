@@ -60,52 +60,51 @@
 </template>
 
 <script>
-  export default {
-    name: 'ProductRead',
-    data() {
-      return {
-        product: {
-          _id: ``,
-          picture: ``,
-          slug: ``,
-          description: ``,
-          weight: ``,
-          condition: ``,
-          notes: ``,
-          created_at: ``,
-          updated_at: ``,
-          title: ``,
-          price: ``,
-          stock: ``,
-          author: ``
-        }
-      }
-    },
-    methods: {
-      rupiah(price) {
-        if (isNaN(price) || typeof price !== 'number') return 'Rp. ' + 0;
-        return 'Rp. ' + Number.parseFloat(price).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+export default {
+  name: 'ProductRead',
+  data() {
+    return {
+      product: {
+        _id: '',
+        picture: '',
+        slug: '',
+        description: '',
+        weight: '',
+        condition: '',
+        notes: '',
+        created_at: '',
+        updated_at: '',
+        title: '',
+        price: '',
+        stock: '',
+        author: '',
       },
+    };
+  },
+  methods: {
+    rupiah(price) {
+      if (isNaN(price) || typeof price !== 'number') return `Rp. ${0}`;
+      return `Rp. ${Number.parseFloat(price).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
     },
-    computed: {
-      fullname() {
-        return this.product.author.first_name + ' ' + this.product.author.last_name
-      },
-      user() {
-        return this.$store.getters.user
-      }
+  },
+  computed: {
+    fullname() {
+      return `${this.product.author.first_name} ${this.product.author.last_name}`;
     },
-    created() {
-      this.$api.get('/products/' + this.$router.currentRoute.params.id)
-        .then(({data}) => {
-          this.product = data;
-        })
-        .catch((err) => {
-          console.log(err)
-        });
-
+    user() {
+      return this.$store.getters.user;
     },
-  };
+  },
+  created() {
+    this.$api.get(`/products/${this.$router.currentRoute.params.id}`)
+      .then(({ data }) => {
+        this.product = data;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  },
+};
 </script>
 
 <style scoped lang="scss">

@@ -92,41 +92,43 @@
 </template>
 
 <script>
-  export default {
-    name: 'Register',
-    data() {
-      return {
-        first_name: '',
-        last_name: '',
-        email: '',
-        username: '',
-        password: '',
-        error: '',
-      };
+export default {
+  name: 'Register',
+  data() {
+    return {
+      first_name: '',
+      last_name: '',
+      email: '',
+      username: '',
+      password: '',
+      error: '',
+    };
+  },
+  methods: {
+    postRegister() {
+      this.error = '';
+      const { email } = this;
+      const { first_name } = this;
+      const { last_name } = this;
+      const { username } = this;
+      const { password } = this;
+      this.$store.dispatch('register', {
+        first_name, last_name, email, username, password,
+      })
+        .then(() => {
+          this.$router.replace('/');
+        })
+        .catch((err) => {
+          if (err.response.data && err.response.data.message) {
+            this.error = err.response.data.message.errors;
+          }
+          setTimeout(() => {
+            // this.error = '';
+          }, 3000);
+        });
     },
-    methods: {
-      postRegister() {
-        this.error = '';
-        let email = this.email;
-        let first_name = this.first_name;
-        let last_name = this.last_name;
-        let username = this.username;
-        let password = this.password;
-        this.$store.dispatch('register', {first_name, last_name, email, username, password})
-          .then(() => {
-            this.$router.replace('/');
-          })
-          .catch((err) => {
-            if (err.response.data && err.response.data.message) {
-              this.error = err.response.data.message.errors;
-            }
-            setTimeout(() => {
-              // this.error = '';
-            }, 3000);
-          });
-      },
-    },
-  };
+  },
+};
 </script>
 
 <style scoped>

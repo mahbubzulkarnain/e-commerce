@@ -25,7 +25,8 @@ if (localStorage.xs) {
 }
 
 Vue.config.productionTip = false;
-document.title = `Ecommerce`;
+document.title = 'Ecommerce';
+Vue.prototype.webname = 'Ecommerce';
 
 new Vue({
   router,
