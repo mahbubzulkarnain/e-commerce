@@ -5,7 +5,9 @@
         <div class="column is-two-fifths">
           <ImageLazyLoad :src="product.picture" :alt="product.title" class="shadow"/>
           <span class="tag">
-            Condition :<b style="padding-left: 10px;">{{+product.condition === 0 ? 'New':'Second'}}</b>
+            Condition :<b style="padding-left: 10px;">
+            {{+product.condition === 0 ? 'New':'Second'}}
+          </b>
           </span>
         </div>
         <div class="column is-three-fifths">
@@ -26,7 +28,8 @@
         </div>
       </div>
       <p class="content">{{product.description}}</p>
-      <div class="columns" v-if="product.author._id !== user.id && $store.getters.isLogin">
+      <form class="columns" v-if="product.author._id !== user.id && $store.getters.isLogin"
+            @submit.prevent="addToChart">
         <div class="column">
           <div class="field is-horizontal">
             <div class="field-label is-normal">
@@ -35,16 +38,16 @@
             <div class="field-body">
               <div class="field">
                 <p class="control">
-                  <input class="input" type="number" value="1">
+                  <input class="input" type="number" value="1" v-model="quantity">
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div class="column">
-          <button class="button is-primary is-fullwidth">Buy</button>
+          <input type="submit" class="button is-primary is-fullwidth" value="Buy">
         </div>
-      </div>
+      </form>
     </div>
     <div class="column is-one-fifth">
       <div class="panel">
@@ -60,10 +63,13 @@
 </template>
 
 <script>
+import rupiah from '../../helpers/rupiah';
+
 export default {
   name: 'ProductRead',
   data() {
     return {
+      quantity: 1,
       product: {
         _id: '',
         picture: '',
@@ -82,9 +88,27 @@ export default {
     };
   },
   methods: {
+    addToChart() {
+      /* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
+      this.$api
+        .post('/carts', {
+          picture: this.product.picture,
+          weight: this.product.weight,
+          condition: this.product.condition,
+          quantity: this.quantity,
+          product: this.product._id,
+          title: this.product.title,
+          price: this.product.price,
+        })
+        .then(({ data }) => {
+          localStorage.xc = data._id;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     rupiah(price) {
-      if (isNaN(price) || typeof price !== 'number') return `Rp. ${0}`;
-      return `Rp. ${Number.parseFloat(price).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+      return rupiah(price);
     },
   },
   computed: {
@@ -95,7 +119,7 @@ export default {
       return this.$store.getters.user;
     },
   },
-  created() {
+  beforeCreate() {
     this.$api.get(`/products/${this.$router.currentRoute.params.id}`)
       .then(({ data }) => {
         this.product = data;
@@ -115,6 +139,6 @@ export default {
   }
 
   .shadow {
-    box-shadow: 1px 0px 1px 1px #ddd;
+    box-shadow: 1px 0 1px 1px #ddd;
   }
 </style>

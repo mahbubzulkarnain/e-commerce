@@ -5,7 +5,7 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
-import ImageLazyLoad from './components/ImageLazyLoad';
+import ImageLazyLoad from './components/ImageLazyLoad.vue';
 
 import WithSidebar from './components/layout/WithSidebar.vue';
 import WithoutSidebar from './components/layout/WithoutSidebar.vue';

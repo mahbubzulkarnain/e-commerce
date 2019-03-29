@@ -1,10 +1,10 @@
 <template>
-  <section class="section">
+  <section class="section" style="border-right: 0px solid lightgrey;min-height: 100vh;padding-right: 0;">
     <aside class="menu">
       <ul class="menu-list">
         <li class="menu-item">
           <router-link to="/">Home</router-link>
-          <router-link to="/carts" v-if="isLogin && false">Cart</router-link>
+          <router-link to="/carts" v-if="isLogin">Cart</router-link>
         </li>
       </ul>
       <p class="menu-label" v-if="isLogin">

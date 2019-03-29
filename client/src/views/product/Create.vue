@@ -132,114 +132,114 @@
 </template>
 
 <script>
-  export default {
-    name: 'Create',
-    data() {
-      return {
-        error: {},
-        btnSell: {
-          button: true,
-          'is-primary': true,
-          'is-loading': false,
-          'is-fullwidth': true,
-        },
-        newProduct: {
-          _id: '',
-          title: '',
-          description: '',
-          price: 0,
-          stock: 0,
-          weight: 0,
-          condition: 0,
-          picture: ''
-        },
-      };
+export default {
+  name: 'Create',
+  data() {
+    return {
+      error: {},
+      btnSell: {
+        button: true,
+        'is-primary': true,
+        'is-loading': false,
+        'is-fullwidth': true,
+      },
+      newProduct: {
+        _id: '',
+        title: '',
+        description: '',
+        price: 0,
+        stock: 0,
+        weight: 0,
+        condition: 0,
+        picture: '',
+      },
+    };
+  },
+  mounted() {
+    if (this.$router.currentRoute.params.id) {
+      this.$api.get(`/products/${this.$router.currentRoute.params.id}`)
+        .then(({ data }) => {
+          this.newProduct = data;
+          console.log(this.newProduct);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  },
+  methods: {
+    previewFiles() {
+      const { files } = this.$refs.inputFile;
+      if (files && files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.$refs.outputFile.src = e.target.result;
+        };
+        reader.readAsDataURL(files[0]);
+      }
     },
-    mounted() {
-      if (this.$router.currentRoute.params.id) {
-        this.$api.get(`/products/${this.$router.currentRoute.params.id}`)
-          .then(({data}) => {
-            this.newProduct = data;
-            console.log(this.newProduct);
+    create_product() {
+      this.btnSell['is-loading'] = true;
+
+
+      const dataUpload = this.newProduct;
+
+      const formData = new FormData();
+      const dataFile = document.querySelector('#file');
+      formData.append('title', dataUpload.title);
+      formData.append('description', dataUpload.description);
+      formData.append('price', +dataUpload.price);
+      formData.append('stock', +dataUpload.stock);
+      formData.append('weight', +dataUpload.weight);
+      formData.append('condition', +dataUpload.condition);
+      formData.append('file', dataFile.files[0]);
+
+      if (!this.newProduct.slug && !this.$router.currentRoute.params.id) {
+        this.$api
+          .post('/products', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          })
+          .then(({ data }) => {
+            this.$router.replace(`/p/${data.slug}`);
           })
           .catch((err) => {
-            console.log(err);
+            if (err.response.data && err.response.data.message) {
+              this.error = err.response.data.message.errors;
+            }
+            setTimeout(() => {
+              // this.error = '';
+            }, 3000);
+          })
+          .finally(() => {
+            this.btnSell['is-loading'] = false;
+          });
+      } else {
+        this.$api
+          .put(`/products/${this.newProduct._id}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          })
+          .then(({ data }) => {
+            this.$router.replace(`/p/${data.slug}`);
+          })
+          .catch((err) => {
+            if (err.response.data && err.response.data.message) {
+              this.error = err.response.data.message.errors;
+            }
+            setTimeout(() => {
+              // this.error = '';
+            }, 3000);
+          })
+          .finally(() => {
+            this.btnSell['is-loading'] = false;
           });
       }
     },
-    methods: {
-      previewFiles() {
-        const {files} = this.$refs.inputFile;
-        if (files && files[0]) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.$refs.outputFile.src = e.target.result;
-          };
-          reader.readAsDataURL(files[0]);
-        }
-      },
-      create_product() {
-        this.btnSell['is-loading'] = true;
-
-
-        const dataUpload = this.newProduct;
-
-        const formData = new FormData();
-        const dataFile = document.querySelector('#file');
-        formData.append('title', dataUpload.title);
-        formData.append('description', dataUpload.description);
-        formData.append('price', +dataUpload.price);
-        formData.append('stock', +dataUpload.stock);
-        formData.append('weight', +dataUpload.weight);
-        formData.append('condition', +dataUpload.condition);
-        formData.append('file', dataFile.files[0]);
-
-        if (!this.newProduct.slug && !this.$router.currentRoute.params.id) {
-          this.$api
-            .post('/products', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            })
-            .then(({data}) => {
-              this.$router.replace(`/p/${data.slug}`);
-            })
-            .catch((err) => {
-              if (err.response.data && err.response.data.message) {
-                this.error = err.response.data.message.errors;
-              }
-              setTimeout(() => {
-                // this.error = '';
-              }, 3000);
-            })
-            .finally(() => {
-              this.btnSell['is-loading'] = false;
-            });
-        } else {
-          this.$api
-            .put(`/products/${this.newProduct._id}`, formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            })
-            .then(({data}) => {
-              this.$router.replace(`/p/${data.slug}`);
-            })
-            .catch((err) => {
-              if (err.response.data && err.response.data.message) {
-                this.error = err.response.data.message.errors;
-              }
-              setTimeout(() => {
-                // this.error = '';
-              }, 3000);
-            })
-            .finally(() => {
-              this.btnSell['is-loading'] = false;
-            });
-        }
-      },
-    },
-  };
+  },
+};
 </script>
 
 <style scoped lang="scss">

@@ -20,7 +20,12 @@
           </a>
 
           <div class="navbar-dropdown">
-            <router-link class="navbar-item" v-for="(category, i) in categories" :to="'/c/'+category.slug" :key="i">
+            <router-link
+              class="navbar-item"
+              v-for="(category, i) in categories"
+              :to="'/c/'+category.slug"
+              :key="i"
+            >
               {{category.title}}
             </router-link>
           </div>

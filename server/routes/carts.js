@@ -5,19 +5,17 @@ const jwt = require('../middlewares/jwt');
 router
   .patch('/:id/quantity/:product/min', jwt, function ({params, body}, res) {
     Cart
-      .findOneAndUpdate({
+      .findOne({
+        buyer: res.locals.user.id,
         _id: params.id,
-        'transactions.product': params.product
-      }, {
-        $inc: {
-          'transactions.$.quantity': -1
-        }
-      }, {
-        new: true
+        status: 0,
       })
-      .then((props) => {
+      .then(async (cart) => {
+        if ((cart.quantity - 1) > 0) {
+          cart.quantity -= 1;
+        }
         res
-          .json(props);
+          .json(await cart.save());
       })
       .catch((err) => {
         console.log(err);
@@ -30,66 +28,18 @@ router
   })
   .patch('/:id/quantity/:product/plus', jwt, function ({params, body}, res) {
     Cart
-      .findOneAndUpdate({
+      .findOne({
+        buyer: res.locals.user.id,
         _id: params.id,
-        'transactions.product': params.product
-      }, {
-        $inc: {
-          'transactions.$.quantity': 1
-        }
-      }, {
-        new: true
+        status: 0,
       })
-      .then((props) => {
-        res
-          .json(props);
-      })
-      .catch((err) => {
-        console.log(err);
-        res
-          .status(500)
-          .json({
-            message: `Internal Server Error`
-          })
-      })
-  })
-  .delete('/:id/remove/:product', jwt, function ({params, body}, res) {
-    Cart
-      .update({_id: params.id}, {"$pull": {"transactions": {"product": params.product}}}, {
-        safe: true,
-        multi: true
-      }, async function (err, obj) {
-        if (err) {
-          res
-            .status(500)
-            .json({
-              message: `Internal Server Error`
-            })
-        } else {
-
-          res.json(await Cart.findById(params.id).exec())
-        }
-      });
-  })
-  .patch('/:id/add', jwt, function ({params, body}, res) {
-    Cart
-      .findById(params.id)
+      .populate('product')
       .then(async (cart) => {
-        if (!cart) {
-          res
-            .status(204)
-            .send();
-        } else {
-          let transaction = {};
-          try {
-            transaction = JSON.parse(body.transactions);
-          } catch (e) {
-            transaction = body.transactions
-          }
-          cart.transactions.push(transaction);
-          res
-            .json(await cart.save());
+        if ((cart.quantity + 1) <= cart.product.stock) {
+          cart.quantity += 1;
         }
+        res
+          .json(await cart.save());
       })
       .catch((err) => {
         console.log(err);
@@ -128,8 +78,18 @@ router
 router
   .get('/', jwt, function (req, res) {
     Cart
-      .find()
-      .then()
+      .find({
+        buyer: res.locals.user.id,
+        status: 0,
+      })
+      .populate({
+        path: 'product',
+        select: 'stock author',
+        populate: {
+          path: 'author',
+          select: 'first_name last_name',
+        }
+      })
       .then((props) => {
         res
           .json(props)
@@ -144,32 +104,34 @@ router
       })
   })
   .post('/', jwt, function ({body}, res) {
-    let transactions = [];
-    try {
-      if (body.transactions) {
-        transactions = (JSON.parse(body.transactions))
-      }
-    } catch (e) {
-      transactions = body.transactions
-    }
-    (new Cart({
-      buyer: res.locals.user.id,
-      transactions
-    })).save((err, data) => {
-      console.log(err, data, 'ini');
-      if (err) {
-        console.log(err);
+    delete body['status'];
+    body['buyer'] = res.locals.user.id;
+    Cart
+      .findOne({
+        buyer: res.locals.user.id,
+        status: 0,
+        product: body.product
+      })
+      .then((cart) => {
+        if (!cart) {
+          return (new Cart(body)).save();
+        } else {
+          cart.quantity += body.quantity;
+          return cart.save();
+        }
+      })
+      .then((prop) => {
+        res
+          .json(prop)
+      })
+      .catch((err) => {
+        console.error(err);
         res
           .status(500)
           .json({
             message: 'Internal Server Error'
           })
-      } else {
-        res
-          .status(201)
-          .json(data)
-      }
-    })
+      })
   });
 
 module.exports = router;
